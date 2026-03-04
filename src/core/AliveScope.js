@@ -13,6 +13,20 @@ export default class AliveScope extends Component {
   nodes = new Map()
   keepers = new Map()
 
+  waitForCache = (id, retry = 30) =>
+    new Promise((resolve) => {
+      const cache = this.store.get(id)
+
+      if (cache || retry <= 0) {
+        resolve(cache)
+        return
+      }
+
+      setTimeout(() => {
+        this.waitForCache(id, retry - 1).then(resolve)
+      }, 0)
+    })
+
   debouncedForceUpdate = debounce((cb) => this.forceUpdate(cb))
   updateCallbackList = []
   smartForceUpdate = (cb) => {
@@ -47,14 +61,10 @@ export default class AliveScope extends Component {
     })
 
   keep = (id, params) =>
-    new Promise((resolve) => {
-      this.update(id, {
-        id,
-        ...params,
-      }).then(() => {
-        resolve(this.store.get(id))
-      })
-    })
+    this.update(id, {
+      id,
+      ...params,
+    }).then(() => this.waitForCache(id))
 
   getCachingNodesByName = (name) =>
     this.getCachingNodes().filter((node) =>

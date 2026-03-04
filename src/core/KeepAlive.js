@@ -42,10 +42,10 @@ class KeepAlive extends Component {
   id = null // 用作 Keeper 识别 KeepAlive
   isKeepAlive = true // 用作 Keeper 识别 KeepAlive
   cached = false
+  unmounted = false
   constructor(props) {
     super(props)
     this.id = props.id
-    this.init()
 
     // 继承响应父级 KeepAlive 的生命周期
     ;[LIFECYCLE_ACTIVATE, LIFECYCLE_UNACTIVATE].forEach((lifecycleName) => {
@@ -73,6 +73,10 @@ class KeepAlive extends Component {
         this.cached = cached
       }
     })
+  }
+
+  componentDidMount() {
+    this.init()
   }
 
   // DOM 操作将实际内容插入占位元素
@@ -183,17 +187,35 @@ class KeepAlive extends Component {
           return
         }
 
-        this.inject()
+        this.waitForPlaceholder().then((isReady) => {
+          if (!isReady) {
+            return
+          }
 
-        // 触发 didActivate 生命周期
-        if (cache.inited) {
-          run(this, LIFECYCLE_ACTIVATE)
-        } else {
-          cache.inited = true
-        }
-        this.cached = false
+          this.inject()
+
+          // 触发 didActivate 生命周期
+          if (cache.inited) {
+            run(this, LIFECYCLE_ACTIVATE)
+          } else {
+            cache.inited = true
+          }
+          this.cached = false
+        })
       })
   }
+
+  waitForPlaceholder = (retry = 30) =>
+    new Promise((resolve) => {
+      if (this.placeholder || retry <= 0 || this.unmounted) {
+        resolve(Boolean(this.placeholder))
+        return
+      }
+
+      setTimeout(() => {
+        this.waitForPlaceholder(retry - 1).then(resolve)
+      }, 0)
+    })
 
   update = ({ _helpers, id, name, ...rest } = {}) => {
     if (!_helpers || this.cached) {
@@ -221,6 +243,7 @@ class KeepAlive extends Component {
 
   // 组件卸载时重置 dom 状态，保证 react dom 操作正常进行，并触发 unactivate 生命周期
   componentWillUnmount() {
+    this.unmounted = true
     const { id, _helpers, when: calcWhen = true } = this.props
     const cache = _helpers.getCache(id)
     const [when, isScope] = parseWhenResult(run(calcWhen))
