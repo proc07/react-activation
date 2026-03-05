@@ -195,36 +195,8 @@ class KeepAlive extends Component {
           cache.inited = true
         }
         this.cached = false
-
-        // this.waitForPlaceholder().then((isReady) => {
-        //   if (!isReady) {
-        //     return
-        //   }
-
-        //   this.inject()
-
-        //   // 触发 didActivate 生命周期
-        //   if (cache.inited) {
-        //     run(this, LIFECYCLE_ACTIVATE)
-        //   } else {
-        //     cache.inited = true
-        //   }
-        //   this.cached = false
-        // })
       })
   }
-
-  waitForPlaceholder = (retry = 30) =>
-    new Promise((resolve) => {
-      console.log('waitForPlaceholder', retry)
-      if (this.placeholder || retry <= 0 || this.unmounted) {
-        resolve(Boolean(this.placeholder))
-        return
-      }
-      setTimeout(() => {
-        this.waitForPlaceholder(retry - 1).then(resolve)
-      }, 0)
-    })
 
   update = ({ _helpers, id, name, ...rest } = {}) => {
     if (!_helpers || this.cached) {
@@ -252,7 +224,6 @@ class KeepAlive extends Component {
 
   // 组件卸载时重置 dom 状态，保证 react dom 操作正常进行，并触发 unactivate 生命周期
   componentWillUnmount() {
-    this.unmounted = true
     const { id, _helpers, when: calcWhen = true } = this.props
     const cache = _helpers.getCache(id)
     const [when, isScope] = parseWhenResult(run(calcWhen))
