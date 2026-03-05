@@ -61,10 +61,14 @@ console.log('waitForCache', retry)
     })
 
   keep = (id, params) =>
+    new Promise((resolve) => {
     this.update(id, {
       id,
       ...params,
-    }).then(() => this.waitForCache(id))
+    }).then(() => {
+      resolve(this.store.get(id))
+    })
+  })
 
   getCachingNodesByName = (name) =>
     this.getCachingNodes().filter((node) =>

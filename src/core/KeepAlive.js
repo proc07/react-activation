@@ -187,21 +187,30 @@ class KeepAlive extends Component {
           return
         }
 
-        this.waitForPlaceholder().then((isReady) => {
-          if (!isReady) {
-            return
-          }
+        this.inject()
+        // 触发 didActivate 生命周期
+        if (cache.inited) {
+          run(this, LIFECYCLE_ACTIVATE)
+        } else {
+          cache.inited = true
+        }
+        this.cached = false
 
-          this.inject()
+        // this.waitForPlaceholder().then((isReady) => {
+        //   if (!isReady) {
+        //     return
+        //   }
 
-          // 触发 didActivate 生命周期
-          if (cache.inited) {
-            run(this, LIFECYCLE_ACTIVATE)
-          } else {
-            cache.inited = true
-          }
-          this.cached = false
-        })
+        //   this.inject()
+
+        //   // 触发 didActivate 生命周期
+        //   if (cache.inited) {
+        //     run(this, LIFECYCLE_ACTIVATE)
+        //   } else {
+        //     cache.inited = true
+        //   }
+        //   this.cached = false
+        // })
       })
   }
 
