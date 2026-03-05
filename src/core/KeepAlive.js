@@ -42,7 +42,6 @@ class KeepAlive extends Component {
   id = null // 用作 Keeper 识别 KeepAlive
   isKeepAlive = true // 用作 Keeper 识别 KeepAlive
   cached = false
-  unmounted = false
   constructor(props) {
     super(props)
     this.id = props.id
