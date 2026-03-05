@@ -207,11 +207,11 @@ class KeepAlive extends Component {
 
   waitForPlaceholder = (retry = 30) =>
     new Promise((resolve) => {
+      console.log('waitForPlaceholder', retry)
       if (this.placeholder || retry <= 0 || this.unmounted) {
         resolve(Boolean(this.placeholder))
         return
       }
-
       setTimeout(() => {
         this.waitForPlaceholder(retry - 1).then(resolve)
       }, 0)

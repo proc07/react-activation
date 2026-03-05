@@ -16,7 +16,7 @@ export default class AliveScope extends Component {
   waitForCache = (id, retry = 30) =>
     new Promise((resolve) => {
       const cache = this.store.get(id)
-
+console.log('waitForCache', retry)
       if (cache || retry <= 0) {
         resolve(cache)
         return

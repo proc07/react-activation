@@ -107,11 +107,12 @@ const useActivation = (funcName, func) => {
   const { attach } = ctxValue
 
   ref[funcName] = func
-  ref.drop = attach(ref)
 
   useEffect(() => {
+    // attach(ref) 从render阶段移动到 useeffect ，避免 react 19并发渲染导致重复注册
+    ref.drop = attach(ref)
     return () => run(ref.drop)
-  }, [])
+  }, [attach, func])
 }
 
 export const useActivate = useActivation.bind(null, LIFECYCLE_ACTIVATE)
